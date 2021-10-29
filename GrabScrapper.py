@@ -15,13 +15,9 @@ import json
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 
-currentPageIndex = 0
 
-s = Service(executable_path='C:/Users/user/Downloads/chromedriver_win32/chromedriver.exe')
-driver = webdriver.Chrome(service=s)
+def PrepareInput(driver, location):
 
-
-def PrepareInput():
     driver.get('https://food.grab.com/ph/en/restaurants')
     try:
         mAddressBar = WebDriverWait(driver, 15).until(
@@ -43,10 +39,7 @@ def PrepareInput():
         print("Location Input not Available!")
 
     searchBar = driver.find_element(By.ID, "location-input")
-    searchBar.send_keys("Avida Towers Asten Tower 1 - Malugay St, San Antonio, Makati, Metro Manila, NCR, 1226, Philippines")
-
-
-PrepareInput()
+    searchBar.send_keys(location)
 
 
 def ScrapePage(link):
@@ -54,16 +47,17 @@ def ScrapePage(link):
     driver = webdriver.Chrome(service=s)
     driver.get(link)
 
-    restaurantId = re.search('[^/]*$', link)
+    restaurantId = re.search('[^/]*$', link)  # using regex to retrieve restaurant Id from the url
 
     try:
         mRestaurant = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.ID, "__NEXT_DATA__")))
+        # wait till __NEXT_DATA__ ID is available
 
     except TimeoutException:
-        # If the loading took too long, print message and try again
         print("Next Data not Available!")
 
+    # move through  __NEXT_DATA__ innerHTML json to retrieve restaurant latitude and longitude
     nextData = driver.find_element(By.ID, "__NEXT_DATA__")
     scriptJson = nextData.get_attribute("innerHTML")
     json_dict = json.loads(scriptJson)
@@ -78,7 +72,7 @@ def ScrapePage(link):
     driver.close()
 
 
-def SetUpPageScrape(scrapePosition):
+def SetUpPageScrape(scrapePosition, driver):
     LinkList = []
     print("Scrape Position is ", scrapePosition)
     try:
@@ -87,23 +81,22 @@ def SetUpPageScrape(scrapePosition):
     except TimeoutException:
         print("Restaurant List not Available!")
 
+    # retrieve all restaurant with the class name
     restaurantList = driver.find_elements(By.CLASS_NAME, "RestaurantListCol___1FZ8V")
 
     print(len(restaurantList))
-    for restaurant in restaurantList[scrapePosition*8:]:
-        restaurantLink = restaurant.find_element(By.CSS_SELECTOR, 'a').get_attribute('href')
+    for restaurant in restaurantList[scrapePosition*8:]:  # always start from multiple of 8 to avoid duplication
+        restaurantLink = restaurant.find_element(By.CSS_SELECTOR, 'a').get_attribute('href') # retrieve link from restaurant list
         LinkList.append(restaurantLink)
-        # startPosition = currentPageIndex * 8
-        # ScrapePage(restaurantLink)
     print("Link len is ", len(LinkList))
     for link in LinkList:
-        ScrapePage(link)
+        ScrapePage(link) # scrape each link available
 
-    restaurantList.clear()
-    LoadMoreRestaurant()
+    restaurantList.clear()  # clear old restaurant from list
+    LoadMoreRestaurant(driver) # load more restaurant if available
 
 
-def LoadMoreRestaurant():
+def LoadMoreRestaurant(driver):
     try:
         nextButtton = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CLASS_NAME, "ant-btn-block")))
@@ -114,16 +107,58 @@ def LoadMoreRestaurant():
     nextPage = driver.find_element(By.CLASS_NAME, "ant-btn-block")
     webdriver.ActionChains(driver).move_to_element(nextPage).click(nextPage).perform()
     driver.implicitly_wait(0)
-    WebDriverWait(driver, 20).until(EC.invisibility_of_element_located((By.CLASS_NAME, "dot___2NCjm")))
+    WebDriverWait(driver, 20).until(EC.invisibility_of_element_located((By.CLASS_NAME, "dot___2NCjm"))) # wait for loading indicator to disappear
     global currentPageIndex
     currentPageIndex = currentPageIndex + 1
-    SetUpPageScrape(currentPageIndex)
-    # time.sleep(10)
-    # WebDriverWait.until(lambda driver: driver.execute_script("return jQuery.active == 0"))
-    # nextLoading = driver.find_elements(By.CLASS_NAME, "loading___16cX8")
+    SetUpPageScrape(currentPageIndex, driver)
 
 
-SetUpPageScrape(0)
+def LoadInAddress(driver):
+    # startLetter = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "O", "Q", "R", "S", "T", "U", "V", "W", "X", "Y","Z"]
+    addressText = []
+    driver.get('https://food.grab.com/ph/en/restaurants')
+
+    try:
+        mAddressBar = WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "sectionContent___2XGJB")))
+
+    except TimeoutException:
+        # If the loading took too long, print message and try again
+        print("AddressBar not Available!")
+
+    addressBarInput = driver.find_element(By.CLASS_NAME, "sectionContent___2XGJB")
+    addressBarInput.click()
+
+    try:
+        mSearchBar = WebDriverWait(driver, 25).until(
+            EC.presence_of_element_located((By.ID, "location-input")))
+
+    except TimeoutException:
+        # If the loading took too long, print message and try again
+        print("Location Input not Available!")
+
+    searchBar = driver.find_element(By.ID, "location-input")
+    searchBar.send_keys("A") # retrieving address based on prediction using first letter as initial, A - Z can be used
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located(
+            (By.CLASS_NAME, "ant-select-dropdown-menu-item")))  # wait for dropdown to be visible
+    locationDropdownList = driver.find_elements(By.CLASS_NAME, "ant-select-dropdown-menu-item")
+
+    for location in locationDropdownList:
+        addressText.append(location.text)
+
+    return addressText
+
+
+if __name__ == "__main__":
+    s = Service(executable_path='C:/Users/user/Downloads/chromedriver_win32/chromedriver.exe') # Change to chromedriver path
+    driver = webdriver.Chrome(service=s)
+    currentPageIndex = 0
+    mAddress = LoadInAddress(driver)
+    for addressText in mAddress:
+        PrepareInput(driver, addressText)
+        SetUpPageScrape(0, driver)
+
+
 
 
 
