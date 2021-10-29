@@ -17,8 +17,8 @@ from time import sleep
 
 
 def PrepareInput(driver, location):
-
     driver.get('https://food.grab.com/ph/en/restaurants')
+
     try:
         mAddressBar = WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CLASS_NAME, "sectionContent___2XGJB")))
@@ -74,7 +74,7 @@ def ScrapePage(link):
 
 def SetUpPageScrape(scrapePosition, driver):
     LinkList = []
-    print("Scrape Position is ", scrapePosition)
+    # print("Scrape Position is ", scrapePosition)
     try:
         mRestaurant = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CLASS_NAME, "RestaurantListCol___1FZ8V")))
@@ -84,11 +84,11 @@ def SetUpPageScrape(scrapePosition, driver):
     # retrieve all restaurant with the class name
     restaurantList = driver.find_elements(By.CLASS_NAME, "RestaurantListCol___1FZ8V")
 
-    print(len(restaurantList))
+    # print(len(restaurantList))
     for restaurant in restaurantList[scrapePosition*8:]:  # always start from multiple of 8 to avoid duplication
         restaurantLink = restaurant.find_element(By.CSS_SELECTOR, 'a').get_attribute('href') # retrieve link from restaurant list
         LinkList.append(restaurantLink)
-    print("Link len is ", len(LinkList))
+    # print("Link len is ", len(LinkList))
     for link in LinkList:
         ScrapePage(link) # scrape each link available
 
@@ -117,7 +117,6 @@ def LoadInAddress(driver):
     # startLetter = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "O", "Q", "R", "S", "T", "U", "V", "W", "X", "Y","Z"]
     addressText = []
     driver.get('https://food.grab.com/ph/en/restaurants')
-
     try:
         mAddressBar = WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CLASS_NAME, "sectionContent___2XGJB")))
