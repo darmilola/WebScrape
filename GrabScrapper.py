@@ -151,9 +151,9 @@ def LoadInAddress(driver):
 if __name__ == "__main__":
     s = Service(executable_path='C:/Users/user/Downloads/chromedriver_win32/chromedriver.exe') # Change to chromedriver path
     driver = webdriver.Chrome(service=s)
-    currentPageIndex = 0
     mAddress = LoadInAddress(driver)
     for addressText in mAddress:
+        currentPageIndex = 0
         PrepareInput(driver, addressText)
         SetUpPageScrape(0, driver)
 
