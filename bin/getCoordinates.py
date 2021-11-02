@@ -48,8 +48,8 @@ class CoordinateScrapper:
             }
         }
 
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--headless')
+        #chrome_options = webdriver.ChromeOptions()
+        #chrome_options.add_argument('--headless')
 
         driver = webdriver.Chrome(service=s, seleniumwire_options=options)
         driver.request_interceptor = self.mInterceptor
