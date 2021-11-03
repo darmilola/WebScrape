@@ -1,7 +1,10 @@
+import asyncio
 import json
 import os
 import random
 import re
+import sys
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 from bs4 import BeautifulSoup
@@ -23,6 +26,10 @@ class CoordinateScrapper:
         self.link_file = link_file
         self.coordinates_file = coordinates_file
         self.data_header_details = data_header_details
+        self.url_max_retrires = 5
+        self.max_retries = 5
+        self.max_workers = 100
+        self.timeout = 10
         self.link_data = json.load(open(os.path.abspath(self.link_file), 'r'))
         self.coordinates_data = json.load(open(os.path.abspath(self.coordinates_file), 'r'))
         self.data_header = json.load(open(os.path.abspath(self.data_header_details), 'r'))
@@ -30,7 +37,7 @@ class CoordinateScrapper:
     def get_coordinates(self):
         for link in self.link_data['restaurant_links']:
             if link not in self.link_data['success_links']:
-               self.ScrapePage(link)
+                self.ScrapePage(link)
 
     def ScrapePage(self, link):
 
@@ -48,10 +55,10 @@ class CoordinateScrapper:
             }
         }
 
-        #chrome_options = webdriver.ChromeOptions()
-        #chrome_options.add_argument('--headless')
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--headless')
 
-        driver = webdriver.Chrome(service=s, seleniumwire_options=options)
+        driver = webdriver.Chrome(service=s, seleniumwire_options=options, chrome_options = chrome_options)
         driver.request_interceptor = self.mInterceptor
         driver.get(link)
 
@@ -64,6 +71,7 @@ class CoordinateScrapper:
             # wait till __NEXT_DATA__ ID is available
 
         except TimeoutException:
+            return '0'
             print("Next Data not Available!")
 
         # move through  __NEXT_DATA__ innerHTML json to retrieve restaurant latitude and longitude
@@ -83,9 +91,10 @@ class CoordinateScrapper:
         json_data = json.dumps(data)
         self.add_coordinates(json_data)
         self.add_success_link(link)
-        print('Shop Id is {} Latitude is {} Longitude is {}"'.format(restaurantId.group(), latLng['latitude'],
-                                                                     latLng['longitude']))
+        print('Shop Id is {} Latitude is {} Longitude is {}"'.format(restaurantId.group(), latLng['latitude'], latLng['longitude']))
         driver.close()
+        return {'link': restaurantId.group()}
+
 
     def save_coordinates(self):
         with open(self.coordinates_file, 'w') as outfile:
@@ -121,5 +130,47 @@ class CoordinateScrapper:
             json.dump(self.link_data, outfile, indent=4)
 
     def add_success_link(self, link):
-        self.link_data['success_links'].append(link)
-        self.save_success_link()
+        if link not in self.link_data['success_links']:
+            self.link_data['success_links'].append(link)
+            self.save_success_link()
+
+    async def get_batch_coordinates(self):
+        unsuccess = []
+        for link in self.link_data['restaurant_links']:
+            if link not in self.link_data['success_links']:
+                unsuccess.append(link)
+        flag = self.max_retries
+        while (flag):
+            try:
+                with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                    loop = asyncio.get_event_loop()
+                    tasks = [
+                        loop.run_in_executor(executor, self.ScrapePage, pro)
+                        for pro in unsuccess
+                    ]
+
+                    for response in await asyncio.gather(*tasks):
+                        if response != '0':
+                            unsuccess.remove(response['link'])
+
+                    if len(unsuccess) == 0:
+                        flag = 0
+                    else:
+                        flag -= 1
+            except Exception as E:
+                print(
+                    'Scrapping Went Wrong -> {} Lineno. -> {}'.format(E, sys.exc_info()[-1].tb_lineno))
+
+
+    def start_scrapping(self):
+        print('Retrieving restaurants coordinates from url')
+        try:
+            self.loop = asyncio.get_event_loop()
+            self.loop.set_debug(1)
+            future = asyncio.ensure_future(self.get_batch_coordinates())
+            self.loop.run_until_complete(future)
+        except Exception as E:
+            print('Warning Log -> {} Lineno -> {}'.format(E, sys.exc_info()[-1].tb_lineno))
+        finally:
+            self.loop.close()
+        print("Scrapping done successfully, data stored in coordinates.json file")
