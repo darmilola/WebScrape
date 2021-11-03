@@ -21,7 +21,6 @@ class RestaurantLinks:
                  data_header_details='bin/json_data/data_header_details.json'):
         self.link_file = link_file
         self.link_data = json.load(open(os.path.abspath(self.link_file), 'r'))
-        print("Total Restaurants Captured is ", len(self.link_data['restaurant_links']))
         print("Retrieving More Restaurants from Grab Foods")
         self.data_header_details = data_header_details
         self.data_header = json.load(open(os.path.abspath(self.data_header_details), 'r'))
@@ -85,7 +84,7 @@ class RestaurantLinks:
         # chrome_options = webdriver.ChromeOptions()
         # chrome_options.add_argument('--headless')
 
-        driver = webdriver.Chrome(service=s)
+        driver = webdriver.Chrome(service=s, seleniumwire_options=options)
         # driver.request_interceptor = self.mInterceptor
         driver.get("https://food.grab.com/ph/en/restaurants")
         self.get_restaurant_links(driver, 0)
