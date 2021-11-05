@@ -21,6 +21,7 @@
         "https://food.grab.com/ph/en/restaurant/coco-fresh-tea-juice-grabkitchen-glorietta-delivery/2-CYXDJ7MYLRJWGX",
         "https://food.grab.com/ph/en/restaurant/mcdonald-s-paco-delivery/2-CYNGTNBYUELAAE",
         "https://food.grab.com/ph/en/restaurant/jollibee-paco-delivery/2-CYLTTKJZG751AE",
+
         "https://food.grab.com/ph/en/restaurant/mang-inasal-paco-delivery/2-C2KBJRKVKAAVCE",
         "https://food.grab.com/ph/en/restaurant/chowking-paco-delivery/2-CYMHN7EAAYKGEE",
         "https://food.grab.com/ph/en/restaurant/j-co-donuts-coffee-un-avenue-available-for-long-distance-delivery-delivery/2-CY2VV3N1FE3BRE",
@@ -717,7 +718,13 @@
         "https://food.grab.com/ph/en/restaurant/black-scoop-cafe-ust-dapitan-navarra-available-for-long-distance-delivery-delivery/2-CZBKL4AFA4KHJN",
         "https://food.grab.com/ph/en/restaurant/tastes-from-the-greens-tondo-available-for-long-distance-delivery-delivery/2-C2LWLNLBJNLDVX",
         "https://food.grab.com/ph/en/restaurant/corner-pizza-first-residences-manila-available-for-long-distance-delivery-delivery/2-C2JYJ7JJLTXHN2",
-        "https://food.grab.com/ph/en/restaurant/via-milk-tea-cafe-ust-dapitan-delivery/2-C2VGAN3KNALVV2"
+        "https://food.grab.com/ph/en/restaurant/via-milk-tea-cafe-ust-dapitan-delivery/2-C2VGAN3KNALVV2",
+        "https://food.grab.com/ph/en/restaurant/mcdonald-s-isetann-recto-delivery/2-CZJGLA3CV4AJLT",
+        "https://food.grab.com/ph/en/restaurant/breadtalk-lucky-chinatown-mall-delivery/PHGFSTI00000101",
+        "https://food.grab.com/ph/en/restaurant/turks-isetann-recto-delivery/2-CYUJJNUFC74EGN",
+        "https://food.grab.com/ph/en/restaurant/quickly-sm-san-lazaro-available-for-long-distance-delivery-delivery/2-C2MFTADHVJXEGE",
+        "https://food.grab.com/ph/en/restaurant/seattle-s-best-coffee-manila-doctors-available-for-long-distance-delivery-delivery/2-CY4KDAJHBECYLE",
+        "https://food.grab.com/ph/en/restaurant/ate-rica-s-bacsilog-first-strip-mendiola-available-for-long-distance-delivery-delivery/2-CZMWUBMERTJBKA"
     ],
     "success_links": [
         "https://food.grab.com/ph/en/restaurant/bizu-patisserie-bistro-greenbelt-2-available-for-long-distance-delivery-delivery/2-CYUALNKYTJAWL2",
@@ -1297,7 +1304,7 @@
         "https://food.grab.com/ph/en/restaurant/dapo-at-tisa-grabkitchen-malate-available-for-long-distance-delivery-delivery/2-C2KXRTXZNGLCCT",
         "https://food.grab.com/ph/en/restaurant/savory-chicken-ph-masangkay-delivery/2-C2BXEAW3LN4HGE",
         "https://food.grab.com/ph/en/restaurant/jollibee-harbour-square-delivery/2-CY2CR65HTEDFLJ",
-        "https://food.grab.com/ph/en/restaurant/hungry-bananas-cristobal-st-delivery/2-C2WVVAUVTKCATE",
+
         "https://food.grab.com/ph/en/restaurant/punzalan-ice-cream-manila-delivery/2-C23XGBAZCBWHCE",
         "https://food.grab.com/ph/en/restaurant/gringo-sm-manila-available-for-long-distance-delivery-delivery/PHGFSTI000002p1",
         "https://food.grab.com/ph/en/restaurant/my-sushi-bake-ust-available-for-long-distance-delivery-delivery/2-C2DWFBCWSAMKN2",
@@ -1437,6 +1444,12 @@
         "https://food.grab.com/ph/en/restaurant/subway-medical-center-manila-available-for-long-distance-delivery-delivery/PHGFSTI000003e8",
         "https://food.grab.com/ph/en/restaurant/via-milk-tea-cafe-ust-dapitan-delivery/2-C2VGAN3KNALVV2",
         "https://food.grab.com/ph/en/restaurant/andok-s-bustillos-delivery/2-CYTCLAXXL4LANJ",
-        "https://food.grab.com/ph/en/restaurant/i-love-milktea-tayuman-delivery/2-C2TKT3DVJYUELX"
+        "https://food.grab.com/ph/en/restaurant/i-love-milktea-tayuman-delivery/2-C2TKT3DVJYUELX",
+        "https://food.grab.com/ph/en/restaurant/quickly-sm-san-lazaro-available-for-long-distance-delivery-delivery/2-C2MFTADHVJXEGE",
+        "https://food.grab.com/ph/en/restaurant/seattle-s-best-coffee-manila-doctors-available-for-long-distance-delivery-delivery/2-CY4KDAJHBECYLE",
+        "https://food.grab.com/ph/en/restaurant/mcdonald-s-isetann-recto-delivery/2-CZJGLA3CV4AJLT",
+        "https://food.grab.com/ph/en/restaurant/ate-rica-s-bacsilog-first-strip-mendiola-available-for-long-distance-delivery-delivery/2-CZMWUBMERTJBKA",
+        "https://food.grab.com/ph/en/restaurant/turks-isetann-recto-delivery/2-CYUJJNUFC74EGN",
+        "https://food.grab.com/ph/en/restaurant/breadtalk-lucky-chinatown-mall-delivery/PHGFSTI00000101"
     ]
 }

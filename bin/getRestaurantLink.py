@@ -22,6 +22,7 @@ class RestaurantLinks:
         self.link_file = link_file
         self.link_data = json.load(open(os.path.abspath(self.link_file), 'r'))
         print("Retrieving More Restaurants from Grab Foods")
+        print(len(self.link_data['restaurant_links']))
         self.data_header_details = data_header_details
         self.data_header = json.load(open(os.path.abspath(self.data_header_details), 'r'))
 
