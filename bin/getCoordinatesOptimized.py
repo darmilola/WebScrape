@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from seleniumwire import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from threading import Thread
+import nest_asyncio
 
 
 class Optimized:
@@ -26,6 +27,7 @@ class Optimized:
         self.timeout = 10
         self.coordinates_data = json.load(open(os.path.abspath(self.coordinates_file), 'r'))
         self.data_header = json.load(open(os.path.abspath(self.data_header_details), 'r'))
+        nest_asyncio.apply()
 
     async def LoadMoreRestaurant(self, driver, scrapePosition):
 
@@ -63,10 +65,13 @@ class Optimized:
             restaurantLink = restaurant.find_element(By.CSS_SELECTOR, 'a').get_attribute(
                 'href')  # retrieve link from restaurant list
             LinkList.append(restaurantLink)
-        loop = asyncio.get_event_loop()
-        asyncio.ensure_future(self.start_scrapping(LinkList))  # start scraping coordinates in batches of 8
-        asyncio.ensure_future(self.LoadMoreRestaurant(driver, scrapePosition))
-        loop.run_forever()
+        loop1 = asyncio.get_event_loop()
+        loop2 = asyncio.get_event_loop()
+        futureScr = asyncio.ensure_future(self.start_scrapping(LinkList))  # start scraping coordinates in batches of 8
+        futureLoad = asyncio.ensure_future(self.LoadMoreRestaurant(driver, scrapePosition))
+        loop1.run_until_complete(futureScr)
+        loop2.run_until_complete(futureLoad)
+
 
     def LoadRestaurant(self):
         s = Service(
@@ -86,7 +91,7 @@ class Optimized:
         # chrome_options = webdriver.ChromeOptions()
         # chrome_options.add_argument('--headless')
 
-        driver = webdriver.Chrome(service=s, seleniumwire_options=options)
+        driver = webdriver.Chrome(service=s)
         # driver.request_interceptor = self.mInterceptor
         driver.get("https://food.grab.com/ph/en/restaurants")
         self.get_restaurant_links(driver, 0)
@@ -207,5 +212,4 @@ class Optimized:
         except Exception as E:
             print('Warning Log -> {} Lineno -> {}'.format(E, sys.exc_info()[-1].tb_lineno))
         finally:
-            self.loop.close()
-        print("Scrapping done successfully, data stored in coordinates.json file")
+            print("Scrapping done successfully, data stored in coordinates.json file")
