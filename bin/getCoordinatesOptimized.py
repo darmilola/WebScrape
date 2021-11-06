@@ -91,7 +91,7 @@ class Optimized:
         # chrome_options = webdriver.ChromeOptions()
         # chrome_options.add_argument('--headless')
 
-        driver = webdriver.Chrome(service=s)
+        driver = webdriver.Chrome(service=s, seleniumwire_options=options)
         # driver.request_interceptor = self.mInterceptor
         driver.get("https://food.grab.com/ph/en/restaurants")
         self.get_restaurant_links(driver, 0)
