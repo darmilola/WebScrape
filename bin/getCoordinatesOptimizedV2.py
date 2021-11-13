@@ -12,11 +12,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 from threading import Thread
+from bs4 import BeautifulSoup
+import requests
 import nest_asyncio
 
 
-class Optimized:
+class OptimizedV2:
     def __init__(self, coordinates_file='bin/json_data/coordinates.json',
                  data_header_details='bin/json_data/data_header_details.json'):
         self.coordinates_file = coordinates_file
@@ -72,49 +75,22 @@ class Optimized:
         loop1.run_until_complete(futureScr)
         loop2.run_until_complete(futureLoad)
 
-
     def LoadRestaurant(self):
+
         s = Service(
             executable_path='C:/Users/user/Downloads/chromedriver_win32/chromedriver.exe')
 
         mProxy = self.data_header['working_proxies'][
             random.randint(0, len(self.data_header['working_proxies']) - 1)]
 
-        options = {
-            'proxy': {
-                'http': 'http://' + mProxy,
-                'https': 'https://' + mProxy,
-                'no_proxy': 'localhost,127.0.0.1'
-            }
-        }
+        chrome_options = webdriver.ChromeOptions()
+        #chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--proxy-server=%s' % mProxy)
+        chrome_options.add_argument('window-size=1920x1080')
 
-        # chrome_options = webdriver.ChromeOptions()
-        # chrome_options.add_argument('--headless')
-
-        driver = webdriver.Chrome(service=s)
-        # driver.request_interceptor = self.mInterceptor
+        driver = webdriver.Chrome(service=s, chrome_options=chrome_options)
         driver.get("https://food.grab.com/ph/en/restaurants")
         self.get_restaurant_links(driver, 0)
-
-    def mInterceptor(self, request):
-        del request.headers['user-agent']
-        del request.headers['referer']
-        del request.headers['Upgrade-Insecure-Requests']
-        del request.headers['DNT']
-        del request.headers['Connection']
-        del request.headers['Accept']
-        del request.headers['Accept-Encoding']
-        del request.headers['Accept-Language']
-        request.headers['user-agent'] = self.data_header['user_agents_scrap'][
-            random.randint(0, len(self.data_header['user_agents_scrap']) - 1)]
-        request.headers['referer'] = self.data_header['referrer'][
-            random.randint(0, len(self.data_header['referrer']) - 1)]
-        request.headers['Upgrade-Insecure-Requests'] = '0'
-        request.headers['DNT'] = '1'
-        request.headers['Connection'] = 'keep-alive'
-        request.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-        request.headers['Accept-Encoding'] = 'gzip, deflate, br'
-        request.headers['Accept-Language'] = 'en-US,en;q=0.5'
 
     def ScrapePage(self, link):
 
@@ -124,35 +100,29 @@ class Optimized:
         mProxy = self.data_header['working_proxies'][
             random.randint(0, len(self.data_header['working_proxies']) - 1)]
 
-        options = {
-            'proxy': {
-                'http': 'http://' + mProxy,
-                'https': 'https://' + mProxy,
-                'no_proxy': 'localhost,127.0.0.1'
-            }
+        headers = {'user-agent': self.data_header['user_agents_scrap'][
+            random.randint(0, len(self.data_header['user_agents_scrap']) - 1)], 'referer': self.data_header['referrer'][
+            random.randint(0, len(self.data_header['referrer']) - 1)], 'Upgrade-Insecure-Requests': '0', 'DNT': '1', 'Connection': 'keep-alive'
+                   , 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate, br', 'Accept-Language': 'en-US,en;q=0.5'}
+
+        mProxyDict = {
+            "http": mProxy,
+            "https": mProxy,
+            "ftp": mProxy
         }
 
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--headless')
+        mRequest = requests.get(link, proxies=mProxyDict, headers = headers)
 
-        driver = webdriver.Chrome(service=s, seleniumwire_options=options, chrome_options=chrome_options)
-        driver.request_interceptor = self.mInterceptor
-        driver.get(link)
         restaurantId = re.search('[^/]*$', link)  # using regex to retrieve restaurant Id from the url
 
-        try:
-            mRestaurant = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.ID, "__NEXT_DATA__")))
-            # wait till __NEXT_DATA__ ID is available
-
-        except TimeoutException:
-            return '0'
-            print("Next Data not Available!")
+        soup = BeautifulSoup(mRequest.content, 'html.parser')
+        scriptJson =  soup.find(id = '__NEXT_DATA__')
 
         # move through  __NEXT_DATA__ innerHTML json to retrieve restaurant latitude and longitude
-        nextData = driver.find_element(By.ID, "__NEXT_DATA__")
-        scriptJson = nextData.get_attribute("innerHTML")
-        json_dict = json.loads(scriptJson)
+        # nextData = driver.find_element(By.ID, "__NEXT_DATA__")
+        # scriptJson = nextData.get_attribute("innerHTML")
+
+        json_dict = json.loads(scriptJson.string)
         props = json_dict['props']
         reduxState = props['initialReduxState']
         restaurantDetail = reduxState['pageRestaurantDetail']
@@ -167,8 +137,8 @@ class Optimized:
         self.add_coordinates(json_data)
         print('Shop Id is {} Latitude is {} Longitude is {}"'.format(restaurantId.group(), latLng['latitude'],
                                                                      latLng['longitude']))
-        driver.close()
         return {'link': restaurantId.group()}
+
 
     def save_coordinates(self):
         with open(self.coordinates_file, 'w') as outfile:
